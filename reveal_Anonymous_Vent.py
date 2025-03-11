@@ -1,11 +1,15 @@
 import telebot
 from telebot import types
+import os
+from fastapi import FastAPI, Request
 
-API_TOKEN = 'your API token'  # Replace with your bot's API token
-GROUP_CHAT_ID = 'yourGroup_id'  # Replace with your group chat ID
-
+API_TOKEN = os.environ.get("BOT_TOKEN")  # Replace with your bot's API token
+GROUP_CHAT_ID = os.environ.get("GROUP_CHAT")  # Replace with your group chat ID # 
 bot = telebot.TeleBot(API_TOKEN)
 user_data = {}
+
+app = FastAPI()
+
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
     markup = types.InlineKeyboardMarkup()
@@ -52,5 +56,10 @@ def send_message(message):
 def get_chat_id(message):
     print(f"Chat ID: {message.chat.id}")  # This prints the correct ID in the console
     bot.send_message(message.chat.id, f"Chat ID: {message.chat.id}")  # Sends it in the chat
+
+@app.get("/")
+def index():
+    return {"message": "Hello World"}
+
 
 bot.infinity_polling()
