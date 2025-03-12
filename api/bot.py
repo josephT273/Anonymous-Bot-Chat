@@ -4,11 +4,21 @@ import os
 from fastapi import FastAPI, Request
 
 API_TOKEN = os.environ.get("BOT_TOKEN")  # Replace with your bot's API token
-GROUP_CHAT_ID = os.environ.get("GROUP_CHAT")  # Replace with your group chat ID # 
+GROUP_CHAT_ID = os.environ.get("GROUP_CHAT")  # Replace with your group chat ID
+WEBHOOK_URL = os.environ.get("WEBHOOK_URL")  # e.g., https://your-vercel-url.vercel.app
+
 bot = telebot.TeleBot(API_TOKEN)
 user_data = {}
 
 app = FastAPI()
+
+# Temoporary Storage
+user_data = {}
+
+# Set the webhook on startup
+bot.remove_webhook()
+bot.set_webhook(url=f"{WEBHOOK_URL}/webhook")
+
 
 @app.get("/")
 async def read_root():
@@ -72,4 +82,4 @@ def get_chat_id(message):
     print(f"Chat ID: {message.chat.id}")  # This prints the correct ID in the console
     bot.send_message(message.chat.id, f"Chat ID: {message.chat.id}")  # Sends it in the chat
 
-bot.infinity_polling()
+# bot.infinity_polling()
