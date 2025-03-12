@@ -10,6 +10,21 @@ user_data = {}
 
 app = FastAPI()
 
+@app.get("/")
+async def read_root():
+    return {
+        "status": "bot is running"
+    }
+
+@app.post("/webhook")
+async def telegram_webhook(req: Request):
+    data = await req.json()
+
+    update = telebot.types.Update.de_json(data)
+    bot.process_new_updates([update])
+
+    return {"status": "ok"}
+
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
     markup = types.InlineKeyboardMarkup()
@@ -56,10 +71,5 @@ def send_message(message):
 def get_chat_id(message):
     print(f"Chat ID: {message.chat.id}")  # This prints the correct ID in the console
     bot.send_message(message.chat.id, f"Chat ID: {message.chat.id}")  # Sends it in the chat
-
-@app.get("/")
-def index():
-    return {"message": "Hello World"}
-
 
 bot.infinity_polling()
