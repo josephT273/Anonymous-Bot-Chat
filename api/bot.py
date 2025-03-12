@@ -28,12 +28,21 @@ async def read_root():
 
 @app.post("/webhook")
 async def telegram_webhook(req: Request):
-    data = await req.json()
+    try:
+        # Attempt to get the incoming data as JSON
+        data = await req.json()
 
-    update = telebot.types.Update.de_json(data)
-    bot.process_new_updates([update])
+        # Parse the update using the telebot package
+        update = telebot.types.Update.de_json(data)
+        bot.process_new_updates([update])
 
-    return {"status": "ok"}
+        return {"status": "ok"}
+    
+    except Exception as e:
+        # Log the error and return the status with the error message
+        logger.error(f"Webhook processing failed: {e}")
+        return {"status": "error", "message": str(e)}
+
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
