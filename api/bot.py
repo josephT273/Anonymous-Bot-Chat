@@ -85,10 +85,3 @@ def send_message(message):
         return
     
     bot.send_message(message.chat.id, "Your message has been sent successfully! / መልዕክትዎ በተሳካ ሁኔታ ተልኳል!")
-
-@bot.message_handler(func=lambda message: True)
-def get_chat_id(message):
-    print(f"Chat ID: {message.chat.id}")  # This prints the correct ID in the console
-    bot.send_message(message.chat.id, f"Chat ID: {message.chat.id}")  # Sends it in the chat
-
-# bot.infinity_polling()
