@@ -1,6 +1,7 @@
 import telebot
 from telebot import types
 import os
+import logging
 from fastapi import FastAPI, Request
 
 API_TOKEN = os.environ.get("BOT_TOKEN")  # Replace with your bot's API token
@@ -11,6 +12,13 @@ bot = telebot.TeleBot(API_TOKEN)
 user_data = {}
 
 app = FastAPI()
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Log when the bot starts
+logger.info("Bot has started working")
 
 # Temoporary Storage
 user_data = {}
@@ -35,17 +43,19 @@ async def telegram_webhook(req: Request):
         # Parse the update using the telebot package
         update = telebot.types.Update.de_json(data)
         bot.process_new_updates([update])
+        logger.log(f"Webhook processing started")
 
         return {"status": "ok"}
     
     except Exception as e:
         # Log the error and return the status with the error message
-        logger.error(f"Webhook processing failed: {e}")
+        logger.error(f"Webhook processing failed: {e}", exc_info=True)
         return {"status": "error", "message": str(e)}
 
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
+    logger.log(f"Webhook processing started: {e}", str(message))
     markup = types.InlineKeyboardMarkup()
     markup.add(types.InlineKeyboardButton("Send Anonymously / በማይታወቅ", callback_data="anonymous"))
     markup.add(types.InlineKeyboardButton("Reveal Username/name / በስም", callback_data="identified"))
@@ -85,3 +95,8 @@ def send_message(message):
         return
     
     bot.send_message(message.chat.id, "Your message has been sent successfully! / መልዕክትዎ በተሳካ ሁኔታ ተልኳል!")
+
+@bot.message_handler(func=lambda message: True)
+def get_chat_id(message):
+    print(f"Chat ID: {message.chat.id}")  # This prints the correct ID in the console
+    bot.send_message(message.chat.id, f"Chat ID: {message.chat.id}")  # Sends it in the chat
