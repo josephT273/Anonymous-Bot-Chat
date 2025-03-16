@@ -43,7 +43,7 @@ async def telegram_webhook(req: Request):
         # Parse the update using the telebot package
         update = telebot.types.Update.de_json(data)
         bot.process_new_updates([update])
-        logger.log(f"Webhook processing started")
+        logger.log(f"Webhook processing started", "started")
 
         return {"status": "ok"}
     
