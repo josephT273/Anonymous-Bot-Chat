@@ -23,9 +23,10 @@ logger.info("Bot has started working")
 # Temoporary Storage
 user_data = {}
 
-# Set the webhook on startup
-bot.remove_webhook()
-bot.set_webhook(url=f"{WEBHOOK_URL}/webhook")
+@app.on_event("startup")
+async def on_startup():
+    bot.remove_webhook()
+    bot.set_webhook(url=f"{WEBHOOK_URL}/webhook")
 
 
 @app.get("/")
@@ -54,7 +55,7 @@ async def telegram_webhook(req: Request):
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    logger.log(f"Webhook processing started: {e}", str(message))
+    logger.info(f"Received /start command from {message.chat.id}")
     markup = types.InlineKeyboardMarkup()
     markup.add(types.InlineKeyboardButton("Send Anonymously / በማይታወቅ", callback_data="anonymous"))
     markup.add(types.InlineKeyboardButton("Reveal Username/name / በስም", callback_data="identified"))
