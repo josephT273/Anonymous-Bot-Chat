@@ -3,6 +3,7 @@ from telebot import types
 import os
 import logging
 from fastapi import FastAPI, Request
+import asyncio
 
 API_TOKEN = os.environ.get("BOT_TOKEN")  # Replace with your bot's API token
 GROUP_CHAT_ID = os.environ.get("GROUP_CHAT")
@@ -43,23 +44,24 @@ async def read_root():
 
 @app.post("/webhook")
 async def telegram_webhook(req: Request):
-    logger.info(f'Bot API key {API_TOKEN}')
     try:
         data = await req.json()
-        logger.info(f"Received Webhook Data: {data}")
+        logger.info(f"Received Webhook Data: {data}")  # Log incoming data
+
         update = telebot.types.Update.de_json(data)
-        bot.process_new_updates([update])
+        
+        # Process update asynchronously
+        loop = asyncio.get_event_loop()
+        loop.create_task(process_update(update))
+
         return {"status": "ok"}
+
     except Exception as e:
         logger.error(f"Webhook processing failed: {e}", exc_info=True)
         return {"status": "error", "message": str(e)}
 
-    
-    except Exception as e:
-        # Log the error and return the status with the error message
-        logger.error(f"Webhook processing failed: {e}", exc_info=True)
-        return {"status": "error", "message": str(e)}
-
+async def process_update(update):
+    bot.process_new_updates([update])
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
@@ -117,4 +119,6 @@ def get_chat_id(message):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    
+    # bot.remove_webhook()  # Ensure no webhook is set
+    bot.polling(none_stop=True)  # Use polling instead
