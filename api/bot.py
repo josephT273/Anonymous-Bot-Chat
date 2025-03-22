@@ -23,7 +23,6 @@ logger = logging.getLogger(__name__)
 
 # Log when the bot starts
 logger.info("Bot has started working")
-logger.info(f'Bot API key {API_TOKEN}')
 # Temoporary Storage
 user_data = {}
 
@@ -44,6 +43,7 @@ async def read_root():
 
 @app.post("/webhook")
 async def telegram_webhook(req: Request):
+    logger.info(f'Bot API key {API_TOKEN}')
     try:
         data = await req.json()
         logger.info(f"Received Webhook Data: {data}")
