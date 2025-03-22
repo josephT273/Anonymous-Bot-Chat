@@ -5,7 +5,11 @@ import logging
 from fastapi import FastAPI, Request
 
 API_TOKEN = os.environ.get("BOT_TOKEN")  # Replace with your bot's API token
-GROUP_CHAT_ID = os.environ.get("GROUP_CHAT")  # Replace with your group chat ID
+GROUP_CHAT_ID = os.environ.get("GROUP_CHAT")
+if GROUP_CHAT_ID is None:
+    raise ValueError("GROUP_CHAT_ID environment variable is missing")
+GROUP_CHAT_ID = int(GROUP_CHAT_ID)
+
 WEBHOOK_URL = os.environ.get("WEBHOOK_URL")  # e.g., https://your-vercel-url.vercel.app
 
 bot = telebot.TeleBot(API_TOKEN)
@@ -25,6 +29,9 @@ user_data = {}
 
 @app.on_event("startup")
 async def on_startup():
+    if not WEBHOOK_URL:
+        raise ValueError("WEBHOOK_URL environment variable is missing")
+    
     bot.remove_webhook()
     bot.set_webhook(url=f"{WEBHOOK_URL}/webhook")
 
@@ -78,7 +85,13 @@ def ask_for_message(call):
 
 def send_message(message):
     mode = user_data.get(message.chat.id, {}).get('mode', 'anonymous')
-    sender_info = "Anonymous / የማይታወቅ" if mode == "anonymous" else f"From: @{message.from_user.username} / ከ: @{message.from_user.username}" if message.from_user.username else f"From: {message.from_user.first_name} / ከ: {message.from_user.first_name}"
+    sender_info = "Anonymous / የማይታወቅ"
+    if mode == "identified":
+        if message.from_user.username:
+            sender_info = f"From: @{message.from_user.username} / ከ: @{message.from_user.username}"
+        else:
+            sender_info = f"From: {message.from_user.first_name} / ከ: {message.from_user.first_name}"
+
     
     if message.content_type == "text":
         bot.send_message(GROUP_CHAT_ID, f"{sender_info}\n\n{message.text}")
@@ -100,3 +113,7 @@ def send_message(message):
 def get_chat_id(message):
     print(f"Chat ID: {message.chat.id}")  # This prints the correct ID in the console
     bot.send_message(message.chat.id, f"Chat ID: {message.chat.id}")  # Sends it in the chat
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
