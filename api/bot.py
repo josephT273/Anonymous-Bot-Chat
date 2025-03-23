@@ -51,17 +51,13 @@ async def telegram_webhook(req: Request):
         update = telebot.types.Update.de_json(data)
         
         # Process update asynchronously
-        loop = asyncio.get_event_loop()
-        loop.create_task(process_update(update))
+        bot.process_new_updates([update])
 
         return {"status": "ok"}
 
     except Exception as e:
         logger.error(f"Webhook processing failed: {e}", exc_info=True)
         return {"status": "error", "message": str(e)}
-
-async def process_update(update):
-    bot.process_new_updates([update])
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
