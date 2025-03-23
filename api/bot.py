@@ -114,7 +114,7 @@ def get_chat_id(message):
     bot.send_message(message.chat.id, f"Chat ID: {message.chat.id}")  # Sends it in the chat
 
 if __name__ == "__main__":
-    import uvicorn
+    # import uvicorn
     
     # bot.remove_webhook()  # Ensure no webhook is set
-    bot.polling(none_stop=True)  # Use polling instead
+    # bot.polling(none_stop=True)  # Use polling instead
