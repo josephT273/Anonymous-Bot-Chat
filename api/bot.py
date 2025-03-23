@@ -51,7 +51,7 @@ async def telegram_webhook(req: Request):
         update = telebot.types.Update.de_json(data)
         
         # Process update asynchronously
-        bot.process_new_updates([update])
+        await asyncio.to_thread(bot.process_new_updates, [update])
 
         return {"status": "ok"}
 
